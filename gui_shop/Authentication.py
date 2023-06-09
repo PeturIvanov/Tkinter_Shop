@@ -1,7 +1,7 @@
 from canvas import root, frame
 from tkinter import Button, Entry
-
 from helpers import clean_screen
+from json import loads, dump
 
 
 def render_entry():
@@ -42,11 +42,11 @@ def registration():
         "Password": password_box.get()
     }
 
-    print(user_info_dict)
 
     if check_registration(user_info_dict):
-        pass
-
+        with open("../db/users_information.txt", "a") as users_file:
+            dump(user_info_dict, users_file)
+            users_file.write("\n")
 
 
 def check_registration(info):
@@ -64,6 +64,40 @@ def check_registration(info):
 
             return False
 
+    info_data = get_users_data()
+
+    for data in info_data:
+        if data["Username"] == info["Username"]:
+            frame.create_text(300, 250,
+                              text="Username is already taken!",
+                              fill="red",
+                              font=('Times','20','bold'),
+                              tags="error"
+                              )
+
+            return False
+
+        elif data["Password"] == info["Password"]:
+            frame.create_text(300, 250,
+                              text="Password is already taken!",
+                              fill="red",
+                              font=('Times', '20', 'bold'),
+                              tags="error"
+                              )
+
+            return False
+
+    return True
+
+
+def get_users_data():
+    info_data = []
+
+    with open("../db/users_information.txt", "r") as users_file:
+        for line in users_file:
+            info_data.append(loads(line))
+
+    return info_data
 
 first_name_box = Entry(root, bd=0)
 last_name_box = Entry(root, bd=0)
